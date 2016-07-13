@@ -1,0 +1,44 @@
+#!/bin/bash -xe
+
+cat >> /root/.ssh/id_rsa <<EOF
+{{PRIVATE_RSA_KEY}}
+EOF
+chmod 0600 /root/.ssh/id_rsa
+
+cat >> /etc/environment <<EOF
+export GH_OAUTH=
+export GHAPIURL='https://api.github.com'
+export GITHUB_DOMAIN='api.github.com'
+export TEMPLATE_LIB_GIT_URL=''
+export TEMPLATE_GIT_URL=''
+export AWS_ACCESS_KEY_ID=
+export AWS_SECRET_ACCESS_KEY=
+export AWS_DEFAULT_REGION=us-east-1
+export S3BUCKET=
+export TEMPLATE_PARAMS=""
+export JENKINS_USER=
+export JENKINS_USER_PW=
+EOF
+
+yum install -y git
+git clone https://github.com/adobe-platform/ci-jenkins /var/lib/jenkins
+cd /var/lib/jenkins && make cent && cd -
+systemctl start jenkins
+
+provisionJob='curl -s -o /dev/null -w %{http_code} localhost:8080/job/provision/api/json'
+while [[ "$($provisionJob)" != "200" ]]; do sleep 2; done
+
+source /etc/environment
+curl -XPOST "localhost:8080/job/provision/buildWithParameters\
+?oauth=$GH_OAUTH\
+&GHAPIURL=$GHAPIURL\
+&GITHUB_DOMAIN=$GITHUB_DOMAIN\
+&TEMPLATE_LIB_GIT_URL=$TEMPLATE_LIB_GIT_URL\
+&TEMPLATE_GIT_URL=$TEMPLATE_GIT_URL\
+&s3bucket=$S3BUCKET\
+&awskey=$AWS_ACCESS_KEY_ID\
+&awssecret=$AWS_SECRET_ACCESS_KEY\
+&awsregion=$AWS_DEFAULT_REGION\
+&templateParams=$TEMPLATE_PARAMS\
+&username=$JENKINS_USER\
+&password=$JENKINS_USER_PW"
