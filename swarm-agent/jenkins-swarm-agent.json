@@ -4,24 +4,41 @@
   "mem": 1024,
   "instances": 2,
   "args": ["-master", "$JENKINS_URL"],
-
   "container": {
-       "type": "DOCKER",
-       "docker": {
-           "image": "eadasiak/jenkins-swarm-agent:0.4",
-           "network": "HOST"
-       },
-       "volumes": [
-         {
-           "hostPath": "/var/run/docker.sock",
-           "containerPath": "/var/run/docker.sock",
-           "mode": "RW"
-         },
-         {
-           "hostPath": "/usr/bin/docker",
-           "containerPath": "/usr/bin/docker",
-           "mode": "RO"
-         }
-       ]
+      "type": "DOCKER",
+      "docker": {
+          "image": "adobeplatform/jenkins-swarm-agent:latest",
+          "network": "HOST",
+          "parameters": [
+              { "key": "user", "value": "root" }
+          ]
+      },
+      "volumes": [
+          {
+            "hostPath": "/var/run/docker.sock",
+            "containerPath": "/var/run/docker.sock",
+            "mode": "RW"
+          },
+          {
+            "hostPath": "/usr/bin/docker",
+            "containerPath": "/usr/bin/docker",
+            "mode": "RO"
+          },
+          {
+            "hostPath": "/root/.aws",
+            "containerPath": "/root/.aws",
+            "mode": "RO"
+          },
+          {
+            "hostPath": "/root/.dockercfg",
+            "containerPath": "/root/.dockercfg",
+            "mode": "RW"
+          },
+          {
+            "hostPath": "/root/.docker",
+            "containerPath": "/root/.docker",
+            "mode": "RW"
+          }
+      ]
    }
 }
