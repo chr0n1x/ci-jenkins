@@ -14,17 +14,17 @@
         <hudson.model.StringParameterDefinition>
           <name>swarmImage</name>
           <description>[OPTIONAL] - Jenkins Swarm Docker image and version to use</description>
-          <defaultValue>adobe-platform/jenkins-swarm-agent:0.2</defaultValue>
+          <defaultValue>adobeplatform/jenkins-swarm-agent:latest</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>swarmMarathonCPU</name>
           <description>[OPTIONAL] - The number of CPU resources to allocate to the Jenkins Swarm Agent instances on Mesos/Marathon</description>
-          <defaultValue></defaultValue>
+          <defaultValue>1</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>swarmMarathonMEM</name>
           <description>[OPTIONAL] - The amount of memory to allocate to the Jenkins Swarm Agent instances on Mesos/Marathon</description>
-          <defaultValue></defaultValue>
+          <defaultValue>512</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>swarmMarathonInstances</name>
@@ -85,9 +85,9 @@ fi
 # build Swarm Args
 SWARM_ARGS=&quot;\&quot;-master\&quot;, \&quot;${swarmJenkinsHost}\&quot;, \&quot;-executors\&quot;, \&quot;${swarmExecutors}\&quot;&quot;
 if [[ $swarmJenkinsUsername != &quot;&quot; ]]; then
-    SWARM_CREDS=&quot; \&quot;-username\&quot;, \&quot;${swarmJenkinsUsername}\&quot;, \&quot;-password\&quot;, \&quot;${swarmJenkinsPassword}\&quot;&quot;
+    SWARM_CREDS=&quot;, \&quot;-username\&quot;, \&quot;${swarmJenkinsUsername}\&quot;, \&quot;-password\&quot;, \&quot;${swarmJenkinsPassword}\&quot;&quot;
     echo &quot;Creating Swarm secrets as ${swarmJenkinsUsername}...&quot;
-    SWARM_ARGS+=SWARM_CREDS
+    SWARM_ARGS+=$SWARM_CREDS
 fi
 
 
@@ -98,20 +98,19 @@ DATA=$(&lt; &lt;(cat &lt;&lt; EOF
   &quot;cpus&quot;: ${swarmMarathonCPU},
   &quot;mem&quot;: ${swarmMarathonMEM},
   &quot;instances&quot;: ${swarmMarathonInstances},
-  &quot;args&quot;:
-    [
+  &quot;args&quot;: [
       ${SWARM_ARGS}
-    ],
-  &quot;container&quot;:
-    {
+  ],
+  &quot;container&quot;: {
       &quot;type&quot;: &quot;DOCKER&quot;,
-      &quot;docker&quot;:
-        {
+      &quot;docker&quot;: {
           &quot;image&quot;: &quot;${swarmImage}&quot;,
-          &quot;network&quot;: &quot;HOST&quot;
-        },
-      &quot;volumes&quot;:
-        [
+          &quot;network&quot;: &quot;HOST&quot;,
+          &quot;parameters&quot;: [
+              { &quot;key&quot;: &quot;user&quot;, &quot;value&quot;: &quot;root&quot; }
+          ]
+      },
+      &quot;volumes&quot;: [
           {
             &quot;hostPath&quot;: &quot;/var/run/docker.sock&quot;,
             &quot;containerPath&quot;: &quot;/var/run/docker.sock&quot;,
@@ -121,9 +120,24 @@ DATA=$(&lt; &lt;(cat &lt;&lt; EOF
             &quot;hostPath&quot;: &quot;/usr/bin/docker&quot;,
             &quot;containerPath&quot;: &quot;/usr/bin/docker&quot;,
             &quot;mode&quot;: &quot;RO&quot;
+          },
+          {
+            &quot;hostPath&quot;: &quot;/root/.aws&quot;,
+            &quot;containerPath&quot;: &quot;/root/.aws&quot;,
+            &quot;mode&quot;: &quot;RO&quot;
+          },
+          {
+            &quot;hostPath&quot;: &quot;/root/.dockercfg&quot;,
+            &quot;containerPath&quot;: &quot;/root/.dockercfg&quot;,
+            &quot;mode&quot;: &quot;RW&quot;
+          },
+          {
+            &quot;hostPath&quot;: &quot;/root/.docker&quot;,
+            &quot;containerPath&quot;: &quot;/root/.docker&quot;,
+            &quot;mode&quot;: &quot;RW&quot;
           }
-        ]
-    }
+      ]
+   }
 }
 EOF
 ))
