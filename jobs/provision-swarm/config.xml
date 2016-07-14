@@ -85,9 +85,9 @@ fi
 # build Swarm Args
 SWARM_ARGS=&quot;\&quot;-master\&quot;, \&quot;${swarmJenkinsHost}\&quot;, \&quot;-executors\&quot;, \&quot;${swarmExecutors}\&quot;&quot;
 if [[ $swarmJenkinsUsername != &quot;&quot; ]]; then
-    SWARM_CREDS=&quot; \&quot;-username\&quot;, \&quot;${swarmJenkinsUsername}\&quot;, \&quot;-password\&quot;, \&quot;${swarmJenkinsPassword}\&quot;&quot;
+    SWARM_CREDS=&quot;, \&quot;-username\&quot;, \&quot;${swarmJenkinsUsername}\&quot;, \&quot;-password\&quot;, \&quot;${swarmJenkinsPassword}\&quot;&quot;
     echo &quot;Creating Swarm secrets as ${swarmJenkinsUsername}...&quot;
-    SWARM_ARGS+=SWARM_CREDS
+    SWARM_ARGS+=$SWARM_CREDS
 fi
 
 
