@@ -98,20 +98,19 @@ DATA=$(&lt; &lt;(cat &lt;&lt; EOF
   &quot;cpus&quot;: ${swarmMarathonCPU},
   &quot;mem&quot;: ${swarmMarathonMEM},
   &quot;instances&quot;: ${swarmMarathonInstances},
-  &quot;args&quot;:
-    [
+  &quot;args&quot;: [
       ${SWARM_ARGS}
-    ],
-  &quot;container&quot;:
-    {
+  ],
+  &quot;container&quot;: {
       &quot;type&quot;: &quot;DOCKER&quot;,
-      &quot;docker&quot;:
-        {
+      &quot;docker&quot;: {
           &quot;image&quot;: &quot;${swarmImage}&quot;,
-          &quot;network&quot;: &quot;HOST&quot;
-        },
-      &quot;volumes&quot;:
-        [
+          &quot;network&quot;: &quot;HOST&quot;,
+          &quot;parameters&quot;: [
+              { &quot;key&quot;: &quot;user&quot;, &quot;value&quot;: &quot;root&quot; }
+          ]
+      },
+      &quot;volumes&quot;: [
           {
             &quot;hostPath&quot;: &quot;/var/run/docker.sock&quot;,
             &quot;containerPath&quot;: &quot;/var/run/docker.sock&quot;,
@@ -122,8 +121,8 @@ DATA=$(&lt; &lt;(cat &lt;&lt; EOF
             &quot;containerPath&quot;: &quot;/usr/bin/docker&quot;,
             &quot;mode&quot;: &quot;RO&quot;
           }
-        ]
-    }
+      ]
+   }
 }
 EOF
 ))
