@@ -1,28 +1,54 @@
-FROM java:8u45-jdk
+FROM docker:1.10-dind
 
-ENV DOCKER_VERSION 1.9.1
-ENV JENKINS_SWARM_VERSION 2.1
-ENV HOME /usr/share/jenkins
+# Please keep each package list in alphabetical order
+# Required dependencies for the Jenkins agent
+RUN apk --update add \
+bash \
+ca-certificates \
+openjdk8 \
+openssh-client
 
-# install Docker first
-RUN apt-get update && \
-  apt-get install -y -q apt-transport-https ca-certificates
-RUN apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D && \
-  mkdir -p /etc/apt/sources.list.d && \
-  echo deb https://apt.dockerproject.org/repo ubuntu-trusty main > /etc/apt/sources.list.d/docker.list && \
-  apt-get update && \
-  apt-get install -y -q docker-engine=$DOCKER_VERSION-0~trusty net-tools && \
-  rm -rf /var/lib/apt/lists/*
+# Optional convenience functions used by most builds
+RUN apk --update add \
+git \
+jq \
+perl \
+py-pip \
+python \
+python3 \
+unzip
 
 # awscli - because ECR access is nice, if needed
-RUN apt-get update && apt-get install python-pip -y && pip install --upgrade awscli
+RUN pip install --upgrade awscli
 
-RUN apt-get update && apt-get install jq
+# Add any SSH known hosts to the environment variable $SSH_KNOWN_HOSTS
+ENV SSH_KNOWN_HOSTS github.com
+RUN ssh-keyscan $SSH_KNOWN_HOSTS | tee /etc/ssh/ssh_known_hosts
+
+# JAVA - directly from:
+#   https://github.com/docker-library/openjdk/blob/54c64cf47d2b705418feb68b811419a223c5a040/8-jdk/alpine/Dockerfile
+ENV LANG C.UTF-8
+RUN { \
+    echo '#!/bin/sh'; \
+    echo 'set -e'; \
+    echo; \
+    echo 'dirname "$(dirname "$(readlink -f "$(which javac || which java)")")"'; \
+  } > /usr/local/bin/docker-java-home \
+  && chmod +x /usr/local/bin/docker-java-home
+ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
+ENV PATH $PATH:/usr/lib/jvm/java-1.8-openjdk/jre/bin:/usr/lib/jvm/java-1.8-openjdk/bin
+ENV JAVA_VERSION 8u92
+ENV JAVA_ALPINE_VERSION 8.92.14-r1
+RUN set -x \
+  && apk add --no-cache \
+    openjdk8="$JAVA_ALPINE_VERSION" \
+  && [ "$JAVA_HOME" = "$(docker-java-home)" ]
 
 # install the Jenkins Swarm Agent
+ENV JENKINS_SWARM_VERSION 2.1
 RUN curl --create-dirs -sSLo /usr/share/jenkins/swarm-client-$JENKINS_SWARM_VERSION-jar-with-dependencies.jar http://maven.jenkins-ci.org/content/repositories/releases/org/jenkins-ci/plugins/swarm-client/$JENKINS_SWARM_VERSION/swarm-client-$JENKINS_SWARM_VERSION-jar-with-dependencies.jar && \
   chmod 755 /usr/share/jenkins
-
 COPY jenkins-slave.sh /usr/local/bin/jenkins-slave.sh
 
 ENTRYPOINT ["/usr/local/bin/jenkins-slave.sh"]
+CMD []
