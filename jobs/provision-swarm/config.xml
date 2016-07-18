@@ -106,26 +106,12 @@ DATA=$(&lt; &lt;(cat &lt;&lt; EOF
       &quot;docker&quot;: {
           &quot;image&quot;: &quot;${swarmImage}&quot;,
           &quot;network&quot;: &quot;HOST&quot;,
+          &quot;privileged&quot;: true,
           &quot;parameters&quot;: [
               { &quot;key&quot;: &quot;user&quot;, &quot;value&quot;: &quot;root&quot; }
           ]
       },
       &quot;volumes&quot;: [
-          {
-            &quot;hostPath&quot;: &quot;/var/run/docker.sock&quot;,
-            &quot;containerPath&quot;: &quot;/var/run/docker.sock&quot;,
-            &quot;mode&quot;: &quot;RW&quot;
-          },
-          {
-            &quot;hostPath&quot;: &quot;/usr/bin/docker&quot;,
-            &quot;containerPath&quot;: &quot;/usr/bin/docker&quot;,
-            &quot;mode&quot;: &quot;RO&quot;
-          },
-          {
-            &quot;hostPath&quot;: &quot;/root/.aws&quot;,
-            &quot;containerPath&quot;: &quot;/root/.aws&quot;,
-            &quot;mode&quot;: &quot;RO&quot;
-          },
           {
             &quot;hostPath&quot;: &quot;/root/.dockercfg&quot;,
             &quot;containerPath&quot;: &quot;/root/.dockercfg&quot;,
