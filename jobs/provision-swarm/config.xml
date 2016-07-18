@@ -107,6 +107,7 @@ DATA=$(&lt; &lt;(cat &lt;&lt; EOF
           &quot;image&quot;: &quot;${swarmImage}&quot;,
           &quot;network&quot;: &quot;HOST&quot;,
           &quot;privileged&quot;: true,
+          &quot;forcePullImage&quot;: true,
           &quot;parameters&quot;: [
               { &quot;key&quot;: &quot;user&quot;, &quot;value&quot;: &quot;root&quot; }
           ]
