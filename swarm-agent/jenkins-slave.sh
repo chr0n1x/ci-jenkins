@@ -2,9 +2,9 @@
 
 set -e
 echo "==> Launching the Docker daemon..."
-dind docker daemon --host=unix:///var/run/docker.sock --storage-driver=vfs &
+dind docker daemon --host=unix:///var/run/docker.sock &
+echo "==> Waiting for the Docker daemon to come online..."
 while(! docker info > /dev/null 2>&1); do
-    echo "==> Waiting for the Docker daemon to come online..."
     sleep 1
 done
 echo "==> Docker Daemon is up and running!"
@@ -18,7 +18,7 @@ if [[ $# -lt 1 ]] || [[ "$1" == "-"* ]]; then
   if [[ "$@" != *"-master "* ]] && [ ! -z "$JENKINS_TCP_ADDR" ]; then
     PARAMS="-master http://$JENKINS_TCP_ADDR:$JENKINS_TCP_PORT"
   fi
-  echo Running java $JAVA_OPTS -jar $JAR -fsroot $HOME $PARAMS "$@"
+  echo "==> Running java $JAVA_OPTS -jar $JAR -fsroot $HOME $PARAMS \"$@\""
   exec java $JAVA_OPTS -jar $JAR -fsroot $HOME $PARAMS "$@"
 fi
 
