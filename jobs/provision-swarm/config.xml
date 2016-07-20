@@ -125,7 +125,7 @@ DATA=$(&lt; &lt;(cat &lt;&lt; EOF
           },
           {
             &quot;hostPath&quot;: &quot;/root/.aws&quot;,
-            &quot;containerPath&quot;: &quot;/root/.aws&quot;,
+            &quot;containerPath&quot;: &quot;/mount/.aws&quot;,
             &quot;mode&quot;: &quot;RO&quot;
           }
       ]
