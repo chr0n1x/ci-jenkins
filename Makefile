@@ -54,7 +54,8 @@ cent:
 	    cd chamberlain && make && cd -
 	sed -i.bak s/JENKINS_USER=\"jenkins\"/JENKINS_USER=\"root\"/g /etc/sysconfig/jenkins
 	# a hack because our internal infra doesn't allow writing to /tmp for some reason
-	sed -i 's/^JENKINS_JAVA_OPTIONS=.*/JENKINS_JAVA_OPTIONS=\"-Djava.awt.headless=true -Djava.io.tmpdir=$$JENKINS_HOME\/tmp\"/' /etc/sysconfig/jenkins
+	# keep undefined parameters or else GHPRBuilder will break
+	sed -i 's/^JENKINS_JAVA_OPTIONS=.*/JENKINS_JAVA_OPTIONS=\"-Djava.awt.headless=true -Djava.io.tmpdir=$$JENKINS_HOME\/tmp -Dhudson.model.ParametersAction.keepUndefinedParameters=true\"/' /etc/sysconfig/jenkins
 	mkdir /var/lib/jenkins/tmp
 	yum install -y jq awscli
 
